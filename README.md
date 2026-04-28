@@ -11,6 +11,10 @@
   <b>L</b>ogical <b>I</b>ntelligent <b>E</b>xecution
 </p>
 
+**C.H.A.R.L.I.E.** is a command-line AI assistant that can be run locally 
+offline (requires model installation) or online using a public API. It is 
+beginner-friendly and can be easily integrated into other projects.
+
 > By _[Morpheus][profile]_
 
 ## What the `charlie` package does
