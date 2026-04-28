@@ -21,6 +21,8 @@
 The package is structured around an `Agent` class, a tool registry, a context
 registry, and a small set of built-in toolsets for text and math operations.
 
+---
+
 ## How to use
 
 ```python
@@ -60,13 +62,26 @@ override `base_url` when creating the agent.
 
 ## How to install
 
+1. Go to the repository homepage on GitHub
+2. Click on [Releases][releases] (found on the right column on Desktop)
+3. Scroll to the latest release and select one of the download links 
+   (ZIP recommended) under 'Assets'
+4. Open the downloaded archive file on your local machine
+
+---
+
+Special thanks to **[@indently](https://github.com/indently)** for his YouTube 
+tutorial series, ["Build a Local AI Agent in Python"][vid]. Check out his 
+YouTube chanel [here](https://www.youtube.com/@Indently).
+
 ---
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the [MIT License](LICENSE.txt).
 
 
 [profile]: https://github.com/TheGittyPerson
 [repo]: https://github.com/TheGittyPerson/C.H.A.R.L.I.E.
 [releases]: https://github.com/TheGittyPerson/C.H.A.R.L.I.E./releases
+[vid]: https://www.youtube.com/watch?v=LykXu60aKoY&list=PL4KX3oEgJcfcPez5tpvsdC1ghaNFo1Bhc
