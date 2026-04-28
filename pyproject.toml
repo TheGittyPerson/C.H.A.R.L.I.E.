@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "C.H.A.R.L.I.E."
+version = "0.1.0"
+description = "A Python package for building a tool-using conversational AI agent with pluggable contexts and local chat-completions backends."
+requires-python = ">=3.11"
+dependencies = [
+    "requests>=2.31.0",
+    "rich>=13.7.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["charlie*"]
