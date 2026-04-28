@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/images/logo_500x500_nobg.png" alt="logo" style="width: 200px">
+</p>
+
 <h1 align="center"><i>C.H.A.R.L.I.E.</i></h1>
 
 **<p align="center">Version 0.1.0</p>**
