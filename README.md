@@ -11,10 +11,10 @@
   <b>L</b>ogical <b>I</b>ntelligent <b>E</b>xecution
 </p>
 
-**C.H.A.R.L.I.E.** is a command-line AI assistant that can be run locally 
-offline (requires model installation) or online using a public API. It is 
-beginner-friendly and highly customizable, and can be easily integrated into 
-other projects.
+**C.H.A.R.L.I.E.** is a lightweight, command-line-centered AI agent and 
+assistant in Python that can be run locally offline (requires model 
+installation) or online using a public API. It is beginner-friendly and highly
+customizable, and can be easily integrated into other projects.
 
 > By _[Morpheus][profile]_
 
@@ -37,31 +37,31 @@ math operations.
 
 ```python
 from charlie.agent import Agent
+from charlie.cli import CLI
 from charlie.contexts import register_default_contexts
 from charlie.toolsets import (
     register_math_tools,
     register_text_tools,
 )
-from charlie.cli import CLI
 
 if __name__ == "__main__":
     charlie = Agent(
         model="qwen/qwen3.5-9b",
         base_url="http://127.0.0.1:1234/v1",
         reasoning="low",
-        system_prompt="You are a helpful and friendly assistant that does what "
-                      "they are told to do. You know your limits and tell the "
-                      "user when they are unable to do a task or don't know "
-                      "something, avoiding assumptions and guessing).",
+        system_prompt=(
+            "You are a helpful and friendly assistant that follows the user's "
+            "instructions, avoids guessing, and states clearly when you do not "
+            "know something."
+        ),
     )
-    charlie.add_request_kwargs(
-        enable_thinking=True,
-    )
+    charlie.add_request_kwargs(enable_thinking=True)
 
     register_default_contexts(
         charlie,
         username="Morpheus",
-        preferred_response_length="no longer than 300"
+        preferred_response_length="no longer than 300 characters",
+        tone_style="friendly and direct",
     )
 
     register_math_tools(charlie)
@@ -78,7 +78,7 @@ if __name__ == "__main__":
 that talks to an OpenAI-compatible endpoint and keeps track of the conversation
 history in memory.
 
-When you create an agent, you choose:
+To build an agent instance, you provide:
 
 - `model`: the model identifier to send in the request
 - `base_url`: the root URL for the chat backend
@@ -100,6 +100,12 @@ Once initialized, the main method you use is `chat()`:
 ```python
 reply = charlie.chat("Summarize this in two sentences.")
 ```
+
+`chat()` returns a dictionary with at least:
+
+- `content`: the assistant's final response text
+- `reasoning`: optional reasoning text when the backend returns it and the
+  current configuration includes it
 
 Calling `chat()`:
 
@@ -153,6 +159,12 @@ runtime context such as:
 
 - the current date and time
 - the current username, or a provided `username`
+- the current working directory
+- the operating system name
+- the Python version
+- the timezone
+- the preferred response length
+- the preferred tone/style
 
 ### `CLI`: the interactive terminal wrapper
 
@@ -178,6 +190,7 @@ Calling `start()` launches a read-eval-print loop that:
 The CLI is customizable through instance attributes:
 
 - `console`: the Rich `Console` object used for terminal I/O
+- `show_reasoning`: whether to print returned reasoning text
 - `user_color`: color for the `You:` prompt
 - `agent_color`: color for the assistant name
 - `spinner_style`: Rich spinner style while waiting on the model
@@ -199,8 +212,9 @@ default terminal front end.
 ---
 
 Special thanks to **[@indently](https://github.com/indently)** for his YouTube 
-tutorial series, ["Build a Local AI Agent in Python"][vid]. Check out his 
-YouTube chanel [here](https://www.youtube.com/@Indently).
+tutorial series, ["Build a Local AI Agent in Python"][vid], which helped get 
+this project started. Check out his YouTube chanel 
+[here](https://www.youtube.com/@Indently).
 
 ---
 
