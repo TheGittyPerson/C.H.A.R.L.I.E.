@@ -83,7 +83,7 @@ class Agent:
                 out = {
                     "content": message.get("content") or "",
                 }
-                if self.reasoning in [None, "off"]:
+                if self.reasoning not in [None, "off"]:
                     out.update(
                         {"reasoning": message.get("reasoning_content") or ""}
                     )

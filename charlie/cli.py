@@ -44,16 +44,12 @@ class CLI:
                 content = response.get("content", "").strip()
                 reasoning = response.get("reasoning", "").strip()
 
+            self.console.print(
+                f"\n[bold][{self.agent_color}]{self.charlie.name}:"
+                f"[/{self.agent_color}][/bold]"
+            )
             if self.show_reasoning and reasoning:
                 self.console.print(
-                    f"\n[bold][{self.agent_color}]{self.charlie.name}:"
-                    f"[/{self.agent_color}][/bold]"
+                    f"\n[bold][dim]Reasoning: {reasoning}[/dim][/bold]",
                 )
-                self.console.print(
-                    f"\n[dim]Reasoning: {reasoning}[/dim]",
-                )
-            else:
-                self.console.print(
-                    f"\n[{self.agent_color}]{self.charlie.name}:"
-                    f"[/{self.agent_color}] {content}"
-                )
+            self.console.print(content)
