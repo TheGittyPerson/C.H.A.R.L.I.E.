@@ -26,7 +26,9 @@ class CLI:
         """Start the CLI for the agent."""
         while True:
             self.console.print(
-                f"\n[{self.user_color}]You:[/{self.user_color}] ", end=""
+                f"\n[bold][{self.user_color}]You:"
+                f"[/{self.user_color}][/bold] ",
+                end=""
             )
             user_input = self.console.input()
 
@@ -44,8 +46,8 @@ class CLI:
 
             if self.show_reasoning and reasoning:
                 self.console.print(
-                    f"\n[{self.agent_color}]{self.charlie.name}:"
-                    f"[/{self.agent_color}]"
+                    f"\n[bold][{self.agent_color}]{self.charlie.name}:"
+                    f"[/{self.agent_color}][/bold]"
                 )
                 self.console.print(
                     f"\n[dim]Reasoning: {reasoning}[/dim]",
