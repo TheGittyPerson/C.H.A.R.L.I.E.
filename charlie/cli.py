@@ -50,6 +50,6 @@ class CLI:
             )
             if self.show_reasoning and reasoning:
                 self.console.print(
-                    f"\n[bold][dim]Reasoning: {reasoning}[/dim][/bold]",
+                    f"\n[dim][bold]Reasoning:[/bold] {reasoning}[/dim]",
                 )
             self.console.print(f"\n{content}")
