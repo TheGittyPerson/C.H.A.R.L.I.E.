@@ -52,4 +52,4 @@ class CLI:
                 self.console.print(
                     f"\n[bold][dim]Reasoning: {reasoning}[/dim][/bold]",
                 )
-            self.console.print(content)
+            self.console.print(f"\n{content}")
