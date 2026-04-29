@@ -27,12 +27,17 @@ class Agent:
     contexts: Contexts = field(default_factory=Contexts)
     messages: list[dict[str, Any]] = field(default_factory=list)
 
+    name: str = "C.H.A.R.L.I.E."
+    name_desc: str = ("Cognitive Helper for Adaptive Response "
+                      "and Logical Intelligent Execution")
+    _insert_name_context: bool = True
+
     def __post_init__(self) -> None:
         """Normalize configuration values after initialization."""
         self.system_prompt = (
-            f"Your name is C.H.A.R.L.I.E. (Cognitive Helper for Adaptive "
-            f"Response and Logical Intelligent Execution). {self.system_prompt}"
-        )
+            f"Your name is {self.name} ({self.name_desc}). "
+            f"{self.system_prompt}"
+        ) if self._insert_name_context else self.system_prompt
         self.base_url = self.base_url.rstrip("/")
 
     def tool(self, func: Callable[..., Any]) -> Callable[..., Any]:
