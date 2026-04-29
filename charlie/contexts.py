@@ -9,7 +9,7 @@ def register_default_contexts(charlie: Agent, **context: Any) -> None:
     """Register the default runtime context providers for the CLI.
 
     Available context kwargs:
-    - `username`
+    - `username`: defaults to `getpass.getuser()`
 
     """
 
