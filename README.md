@@ -54,7 +54,10 @@ if __name__ == "__main__":
                       "helpful and friendly assistant that does what they are "
                       "told to do. You know your limits and tell the user "
                       "when they are unable to do a task or don't know "
-                      "something, avoiding assumptions and guessing)."
+                      "something, avoiding assumptions and guessing).",
+    )
+    charlie.add_request_kwargs(
+        enable_reasoning=True,
     )
 
     register_default_contexts(charlie, username="Morpheus")
@@ -64,7 +67,6 @@ if __name__ == "__main__":
 
     cli = CLI(charlie)
     cli.start()
-
 ```
 
 ### `Agent`: the core runtime
@@ -80,6 +82,15 @@ When you create an agent, you choose:
 - optional generation settings such as `temperature`, `repeat_penalty`,
   `max_output_tokens`, and `reasoning`
 - `system_prompt`: the behavior and instruction prompt for the assistant
+
+If a backend needs extra request fields that are not first-class `Agent`
+attributes, you can add them after initialization with
+`add_request_kwargs()`. Those values are merged into the outgoing
+chat-completions payload.
+
+```python
+charlie.add_request_kwargs(top_p=0.9, seed=7, stop=["END"])
+```
 
 Once initialized, the main method you use is `chat()`:
 

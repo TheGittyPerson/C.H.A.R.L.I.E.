@@ -22,6 +22,7 @@ class Agent:
     repeat_penalty: int | float | None = None
     max_output_tokens: int | None = None
     reasoning: Literal["off", "low", "medium", "high", "on"] | None = None
+    extra_request_kwargs: dict[str, Any] = field(default_factory=dict)
 
     tools: Tools = field(default_factory=Tools)
     contexts: Contexts = field(default_factory=Contexts)
@@ -47,6 +48,23 @@ class Agent:
     def context(self, func: Callable[[], str]) -> Callable[[], str]:
         """Register a callable that can supply dynamic prompt context."""
         return self.contexts.register(func)
+
+    def add_request_kwargs(self, **kwargs: Any) -> None:
+        """Add extra requests kwargs that will be added to the payload.
+
+        Using existing key names overwrites the original.
+        Access `self.extra_request_kwargs` for more manual control.
+        """
+        self.extra_request_kwargs.update(kwargs)
+
+    def remove_request_kwargs(self, *keys: str) -> None:
+        """Remove extra requests kwargs from `self.extra_request_kwargs`.
+
+        Non-existing keys are ignored.
+        Access `self.extra_request_kwargs` for more manual control.
+        """
+        for key in keys:
+            self.extra_request_kwargs.pop(key, None)
 
     def chat(self, user_message: str) -> dict[str, str]:
         """Send a message to the model and persist the conversation history."""
@@ -104,6 +122,8 @@ class Agent:
         tool_schemas = self.tools.get_schemas()
         if tool_schemas:
             api_kwargs["tools"] = tool_schemas
+
+        api_kwargs.update(self.extra_request_kwargs)
 
         return api_kwargs
 
