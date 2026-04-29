@@ -13,7 +13,7 @@ class Agent:
     """Stateful client for a local OpenAI-compatible chat endpoint."""
 
     model: str
-    base_url: str = "http://127.0.0.1:1234/v1"
+    base_url: str
     api_endpoint: str = "/chat/completions"
     api_key: str = field(default="NO_API_KEY", repr=False)
 
