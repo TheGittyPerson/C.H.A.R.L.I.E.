@@ -6,7 +6,10 @@ from charlie.toolsets.math_tools import register_math_tools
 
 class BaseConversionToolsTestCase(unittest.TestCase):
     def setUp(self) -> None:
-        charlie = Agent()
+        charlie = Agent(
+            model="test-model",
+            base_url="http://127.0.0.1:1234/v1",
+        )
         register_math_tools(charlie)
         self.encode_binary = charlie.tools.tools["encode_binary"]
         self.decode_binary = charlie.tools.tools["decode_binary"]

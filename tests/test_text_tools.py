@@ -6,7 +6,10 @@ from charlie.toolsets.text_tools import register_text_tools
 
 class MorseToolsTestCase(unittest.TestCase):
     def setUp(self) -> None:
-        charlie = Agent()
+        charlie = Agent(
+            model="test-model",
+            base_url="http://127.0.0.1:1234/v1",
+        )
         register_text_tools(charlie)
         self.encode_morse = charlie.tools.tools["encode_morse"]
         self.decode_morse = charlie.tools.tools["decode_morse"]
@@ -39,7 +42,10 @@ class MorseToolsTestCase(unittest.TestCase):
 
 class BasicTextToolsTestCase(unittest.TestCase):
     def setUp(self) -> None:
-        charlie = Agent()
+        charlie = Agent(
+            model="test-model",
+            base_url="http://127.0.0.1:1234/v1",
+        )
         register_text_tools(charlie)
         self.count_text_length = charlie.tools.tools["count_text_length"]
         self.count_substring_instances = (
@@ -69,7 +75,7 @@ class BasicTextToolsTestCase(unittest.TestCase):
     def test_reverse_text(self) -> None:
         self.assertEqual(
             self.reverse_text("charlie"),
-            {"result": "SIVRAJ"},
+            {"result": "eilrahc"},
         )
 
     def test_normalize_whitespace(self) -> None:
