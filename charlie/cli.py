@@ -10,6 +10,8 @@ class CLI:
     charlie: Agent
     console: Console = field(default_factory=Console)
 
+    show_reasoning: bool = False
+
     user_color: str = "green"
     agent_color: str = "blue"
     spinner_style: str = "aesthetic"
@@ -36,9 +38,20 @@ class CLI:
                 f"[dim]{self.thinking_message}[/dim]",
                 spinner=self.spinner_style
             ):
-                response = self.charlie.chat(user_input).strip()
+                response = self.charlie.chat(user_input)
+                content = response.get("content", "").strip()
+                reasoning = response.get("reasoning", "").strip()
 
-            self.console.print(
-                f"\n[{self.agent_color}]{self.charlie.name}:"
-                f"[/{self.agent_color}] {response}"
-            )
+            if self.show_reasoning and reasoning:
+                self.console.print(
+                    f"\n[{self.agent_color}]{self.charlie.name}:"
+                    f"[/{self.agent_color}]"
+                )
+                self.console.print(
+                    f"\n[dim]Reasoning: {reasoning}[/dim]",
+                )
+            else:
+                self.console.print(
+                    f"\n[{self.agent_color}]{self.charlie.name}:"
+                    f"[/{self.agent_color}] {content}"
+                )

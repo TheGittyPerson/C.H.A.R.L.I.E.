@@ -48,7 +48,7 @@ class Agent:
         """Register a callable that can supply dynamic prompt context."""
         return self.contexts.register(func)
 
-    def chat(self, user_message: str) -> str:
+    def chat(self, user_message: str) -> dict[str, str]:
         """Send a message to the model and persist the conversation history."""
         self._append_user_message(user_message)
         prefix: list[dict[str, Any]] = self._build_prefix_messages()
@@ -62,7 +62,14 @@ class Agent:
             tool_calls = self._append_assistant_message(message)
 
             if not tool_calls:
-                return message.get("content") or ""
+                out = {
+                    "content": message.get("content") or "",
+                }
+                if self.reasoning in [None, "off"]:
+                    out.update(
+                        {"reasoning": message.get("reasoning_content") or ""}
+                    )
+                return out
 
             self._handle_tool_calls(tool_calls)
 
