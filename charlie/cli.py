@@ -1,20 +1,44 @@
-from typing import Any
+from dataclasses import dataclass, field
 
 from rich.console import Console
 
+from .agent import Agent
 
-def start(charlie: Any) -> int:
-    console = Console()
 
-    while True:
-        console.print("\n[green]You:[/green] ", end="")
-        user_input = console.input()
+@dataclass
+class CLI:
+    charlie: Agent
+    console: Console = field(default_factory=Console)
 
-        if user_input.lower().strip() in ["quit", "exit", "bye"]:
-            console.print("\n[dim]Bye![/dim]")
-            return 0
+    user_color: str = "green"
+    agent_color: str = "blue"
+    spinner_style: str = "aesthetic"
 
-        with console.status("[dim]Thinking...[/dim]", spinner="aesthetic"):
-            response = charlie.chat(user_input).strip()
+    thinking_message: str = "Thinking..."
+    exit_keywords: list[str] = field(
+        default_factory=lambda: ["bye", "quit", "exit"]
+    )
+    exit_message: str = "Bye!"
 
-        console.print(f"\n[blue]C.H.A.R.L.I.E.:[/blue] {response}")
+    def start(self) -> int:
+        """Start the CLI for the agent."""
+        while True:
+            self.console.print(
+                f"\n[{self.user_color}]You:[/{self.user_color}] ", end=""
+            )
+            user_input = self.console.input()
+
+            if user_input.lower().strip() in self.exit_keywords:
+                self.console.print(f"\n[dim]{self.exit_message}[/dim]")
+                return 0
+
+            with self.console.status(
+                f"[dim]{self.thinking_message}[/dim]",
+                spinner=self.spinner_style
+            ):
+                response = self.charlie.chat(user_input).strip()
+
+            self.console.print(
+                f"\n[{self.agent_color}]{self.charlie.name}:"
+                f"[/{self.agent_color}] {response}"
+            )
