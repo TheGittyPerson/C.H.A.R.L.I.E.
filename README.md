@@ -27,9 +27,9 @@ customizable, and can be easily integrated into other projects.
 - register runtime context providers and inject their output into the prompt
 - run an interactive and customizable terminal chat loop
 
-The package is structured around an `Agent` class, a `CLI` class, a tool 
-registry, a context registry, and a small set of built-in toolsets for text and
-math operations.
+The package is structured around an `Agent` class, a `CLI` class, a tool
+registry, a context registry, and a small set of built-in toolsets for text,
+math, datetime, and structured-data operations.
 
 ---
 
@@ -40,6 +40,8 @@ from charlie.agent import Agent
 from charlie.cli import CLI
 from charlie.contexts import register_default_contexts
 from charlie.toolsets import (
+    register_data_tools,
+    register_datetime_tools,
     register_math_tools,
     register_text_tools,
 )
@@ -66,6 +68,8 @@ if __name__ == "__main__":
 
     register_math_tools(charlie)
     register_text_tools(charlie)
+    register_datetime_tools(charlie)
+    register_data_tools(charlie)
 
     cli = CLI(charlie, show_reasoning=True)
     cli.start()
@@ -136,8 +140,9 @@ into a tool schema, and exposes that schema to the model. When the model emits
 a tool call, the agent runs the matching Python function and appends the result
 back into the conversation as a tool message.
 
-Out of the box, the project includes some basic helper registration functions 
-that you can directly import into your project.
+Out of the box, the project includes helper registration functions for text,
+math, datetime, and JSON/CSV data handling that you can directly import into
+your project.
 
 ### Registering runtime context
 
