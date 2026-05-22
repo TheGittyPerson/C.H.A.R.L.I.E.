@@ -109,7 +109,7 @@ class CLI:
         except (RuntimeError, ValueError, KeyError) as exc:
             self.console.print(
                 "\n[bold][red]Error:[/red][/bold] "
-                f"Application error: {exc}"
+                f"C.H.A.R.L.I.E. encountered an error: {exc}"
             )
         except Exception:
             self.console.print(
