@@ -66,27 +66,44 @@ class Agent:
         for key in keys:
             self.extra_request_kwargs.pop(key, None)
 
-    def chat(self, user_message: str) -> dict[str, str]:
-        """Send a message to the model and persist the conversation history."""
+    def chat(self, user_message: str) -> dict[str, Any]:
+        """Send a message to the model and persist the conversation history.
+
+        Return a dict with:
+        - `content`: message contents
+        - `reasoning`: model reasoning (only if `self.reasoning` is on)
+        - `token_cost`: total token cost (`None` if not found)
+        """
         self._append_user_message(user_message)
         prefix: list[dict[str, Any]] = self._build_prefix_messages()
 
         # Keep going until the model gives a final reply with no tool calls.
+        token_cost: int = 0
         while True:
             api_kwargs: dict[str, Any] = self._build_request_payload(prefix)
 
             response_data = self._post_chat_completion(api_kwargs)
-            message = self._extract_message(response_data)
-            tool_calls = self._append_assistant_message(message)
+            # Includes reasoning content (if turned on and provided).
+            message_content = self._extract_message_data(response_data)
+            token_cost += self._extract_token_cost(response_data) or 0
+            tool_calls = self._append_assistant_message(message_content)
 
             if not tool_calls:
                 out = {
-                    "content": message.get("content") or "",
+                    "content": message_content.get("content") or "",
                 }
                 if self.reasoning not in [None, "off"]:
                     out.update(
-                        {"reasoning": message.get("reasoning_content") or ""}
+                        {
+                            "reasoning": message_content.get(
+                                "reasoning_content"
+                            ) or ""
+                        }
                     )
+                out.update(
+                    {"token_cost": token_cost if token_cost != 0 else None}
+                )
+
                 return out
 
             self._handle_tool_calls(tool_calls)
@@ -149,8 +166,11 @@ class Agent:
         return r.json()
 
     @staticmethod
-    def _extract_message(response_data: dict[str, Any]) -> dict[str, Any]:
-        """Validate response shape and return the first assistant message."""
+    def _extract_message_data(response_data: dict[str, Any]) -> dict[str, Any]:
+        """Validate response shape and return the first assistant message.
+
+        Also include reasoning content if enabled.
+        """
         choices: list[dict[str, Any]] | None = response_data.get("choices")
 
         if not choices:
@@ -162,6 +182,27 @@ class Agent:
             raise RuntimeError("Model response missing messages")
         message: dict[str, Any]
         return message
+
+    @staticmethod
+    def _extract_token_cost(response_data: dict[str, Any]) -> int | None:
+        """Validate response shape and return total token cost.
+
+        Not to be confused with prompt token count.
+        Reasoning tokens are not included unless the API includes them in the
+        total tokens).
+
+        Return `None` if the total token cost is not found.
+        """
+        usage: dict[str, Any] | None = response_data.get("usage")
+
+        if not usage:
+            return None
+
+        total_tokens: int | None = usage.get("total_tokens")
+        if total_tokens is None:
+            return None
+
+        return total_tokens
 
     def _append_assistant_message(
             self, message: dict[str, Any]

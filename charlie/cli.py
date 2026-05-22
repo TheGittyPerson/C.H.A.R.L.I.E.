@@ -13,6 +13,7 @@ class CLI:
     console: Console = field(default_factory=Console)
 
     show_reasoning: bool = False
+    show_token_cost: bool = False
 
     user_color: str = "green"
     agent_color: str = "blue"
@@ -58,6 +59,7 @@ class CLI:
                     response = self.charlie.chat(user_input)
                     content = response.get("content", "").strip()
                     reasoning = response.get("reasoning", "").strip()
+                    token_cost = response.get("token_cost") or "-"
 
                 self.console.print(
                     f"\n[bold][{self.agent_color}]{self.charlie.name}:"
@@ -67,7 +69,13 @@ class CLI:
                     self.console.print(
                         f"\n[dim][bold]Reasoning:[/bold] {reasoning}[/dim]",
                     )
+
                 self.console.print(f"\n{content}")
+
+                if self.show_token_cost:
+                    self.console.print(
+                        f"\n[dim]Token cost: {token_cost}[/dim]",
+                    )
 
         except KeyboardInterrupt:
             self.console.print("\n[dim]Program stopped.[/dim]")
