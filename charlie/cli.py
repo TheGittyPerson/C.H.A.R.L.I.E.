@@ -74,7 +74,7 @@ class CLI:
 
                 if self.show_token_cost:
                     self.console.print(
-                        f"\n[dim]Token cost: {token_cost}[/dim]",
+                        f"\n[dim]Token cost:[/dim] {token_cost}",
                     )
 
         except KeyboardInterrupt:
