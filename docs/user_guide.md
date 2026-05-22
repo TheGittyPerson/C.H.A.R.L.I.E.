@@ -21,7 +21,6 @@ math, datetime, and structured-data operations.
 
 ```python
 from charlie.agent import Agent
-from charlie.cli import CLI
 from charlie.contexts import register_default_contexts
 from charlie.toolsets import (
     register_data_tools,
@@ -29,25 +28,25 @@ from charlie.toolsets import (
     register_math_tools,
     register_text_tools,
 )
+from charlie.cli import CLI
 
 if __name__ == "__main__":
     charlie = Agent(
         model="qwen/qwen3.5-9b",
-        base_url="http://127.0.0.1:1234/v1",
+        base_url="http://127.0.0.1:5508/v1",
         reasoning="low",
-        system_prompt=(
-            "You are a helpful and friendly assistant that follows the user's "
-            "instructions, avoids guessing, and states clearly when you do not "
-            "know something."
-        ),
+        system_prompt="You are a helpful and friendly assistant that does what "
+                      "they are told to do. You know your limits and tell the "
+                      "user when they are unable to do a task or don't know "
+                      "something, avoiding assumptions and guessing).",
     )
-    charlie.add_request_kwargs(enable_thinking=True)
+    charlie.add_request_kwargs(
+        enable_thinking=True,
+    )
 
     register_default_contexts(
         charlie,
         username="Morpheus",
-        preferred_response_length="no longer than 300 characters",
-        tone_style="friendly and direct",
     )
 
     register_math_tools(charlie)
@@ -55,7 +54,11 @@ if __name__ == "__main__":
     register_datetime_tools(charlie)
     register_data_tools(charlie)
 
-    cli = CLI(charlie, show_reasoning=True)
+    cli = CLI(
+        charlie,
+        show_reasoning=True,
+        show_token_cost=True
+    )
     cli.start()
 
 ```
@@ -94,6 +97,7 @@ reply = charlie.chat("Summarize this in two sentences.")
 - `content`: the assistant's final response text
 - `reasoning`: optional reasoning text when the backend returns it and the
   current configuration includes it
+- `token_cost`: optional total token cost for the completed chat turn
 
 Calling `chat()`:
 
@@ -164,7 +168,7 @@ without changing the agent implementation itself.
 Basic usage:
 
 ```python
-cli = CLI(charlie)
+cli = CLI(charlie, show_reasoning=True, show_token_cost=True)
 cli.start()
 ```
 
@@ -180,6 +184,7 @@ The CLI is customizable through instance attributes:
 
 - `console`: the Rich `Console` object used for terminal I/O
 - `show_reasoning`: whether to print returned reasoning text
+- `show_token_cost`: whether to print the returned token cost
 - `user_color`: color for the `You:` prompt
 - `agent_color`: color for the assistant name
 - `spinner_style`: Rich spinner style while waiting on the model
