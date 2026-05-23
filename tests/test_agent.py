@@ -4,12 +4,10 @@ from unittest.mock import patch
 from charlie.agent import Agent
 
 
+# noinspection PyMethodMayBeStatic
 class _FakeResponse:
-    def raise_for_status(self) -> None:
-        return None
-
-    def json(self) -> dict:
-        return {
+    def __init__(self, payload: dict | None = None) -> None:
+        self._payload = payload or {
             "choices": [
                 {
                     "message": {
@@ -19,6 +17,12 @@ class _FakeResponse:
                 }
             ]
         }
+
+    def raise_for_status(self) -> None:
+        return None
+
+    def json(self) -> dict:
+        return self._payload
 
 
 class AgentRequestTestCase(unittest.TestCase):
@@ -41,7 +45,7 @@ class AgentRequestTestCase(unittest.TestCase):
         self.assertEqual(request_json["temperature"], 0.7)
 
     @patch("charlie.agent.requests.post")
-    def test_chat_omits_temperature_when_not_configured(self, mock_post) -> None:
+    def test_chat_omits_temperature_when_not_configed(self, mock_post) -> None:
         mock_post.return_value = _FakeResponse()
 
         agent = self._make_agent()
@@ -76,6 +80,75 @@ class AgentRequestTestCase(unittest.TestCase):
         self.assertEqual(request_json["top_p"], 0.9)
         self.assertNotIn("seed", request_json)
         self.assertNotIn("stop", request_json)
+
+    @patch("charlie.agent.requests.post")
+    def test_chat_accumulates_token_cost_across_tool_calls(
+            self, mock_post
+    ) -> None:
+        mock_post.side_effect = [
+            _FakeResponse({
+                "choices": [
+                    {
+                        "message": {
+                            "content": "",
+                            "tool_calls": [
+                                {
+                                    "id": "call_1",
+                                    "type": "function",
+                                    "function": {
+                                        "name": "echo_text",
+                                        "arguments": '{"text": "hello"}',
+                                    },
+                                }
+                            ],
+                        }
+                    }
+                ],
+                "usage": {"total_tokens": 11},
+            }),
+            _FakeResponse({
+                "choices": [
+                    {
+                        "message": {
+                            "content": "done",
+                            "tool_calls": [],
+                        }
+                    }
+                ],
+                "usage": {"total_tokens": 7},
+            }),
+        ]
+
+        agent = self._make_agent()
+
+        @agent.tool
+        def echo_text(text: str) -> dict[str, str]:
+            return {"result": text}
+
+        response = agent.chat("Hello")
+
+        self.assertEqual(response["content"], "done")
+        self.assertEqual(response["token_cost"], 18)
+
+    @patch("charlie.agent.requests.post")
+    def test_chat_returns_none_token_cost_when_usage_missing(
+            self, mock_post
+    ) -> None:
+        mock_post.return_value = _FakeResponse({
+            "choices": [
+                {
+                    "message": {
+                        "content": "ok",
+                        "tool_calls": [],
+                    }
+                }
+            ]
+        })
+
+        agent = self._make_agent()
+        response = agent.chat("Hello")
+
+        self.assertIsNone(response["token_cost"])
 
 
 if __name__ == "__main__":

@@ -56,7 +56,9 @@ class JsonToolsTestCase(unittest.TestCase):
 
     def test_list_json_keys(self) -> None:
         self.assertEqual(
-            self.list_json_keys('{"user":{"name":"Charlie","role":"agent"}}', "user"),
+            self.list_json_keys(
+                '{"user":{"name":"Charlie","role":"agent"}}', "user"
+            ),
             {"result": ["name", "role"]},
         )
 
