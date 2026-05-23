@@ -40,17 +40,12 @@ class CLI:
     def start(self) -> None:
         """Start the CLI for the agent. Return status."""
         try:
-            while True:
-                self.console.print(
-                    f"\n[bold][{self.user_color}]You:"
-                    f"[/{self.user_color}][/bold] ",
-                    end=""
-                )
-                user_input = self.console.input()
-
-                if user_input.lower().strip() in self.exit_keywords:
-                    self.console.print(f"\n[dim]{self.exit_message}[/dim]")
-                    return
+            while (
+                    user_input := self.console.input(  # I love this operator
+                        f"\n[bold][{self.user_color}]"
+                        f"You:[/{self.user_color}][/bold] "
+                    )
+            ) not in self.exit_keywords:
 
                 with self.console.status(
                     f"[dim]{self.thinking_message}[/dim]",
@@ -124,5 +119,8 @@ class CLI:
                 f"\n[bold][red]Error:[/red][/bold] An unexpected error "
                 "occurred."
             )
+        else:
+            self.console.print(f"\n[dim]{self.exit_message}[/dim]")
+            return
 
         self._maybe_show_traceback()
