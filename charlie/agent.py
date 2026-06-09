@@ -1,6 +1,6 @@
 import json
 from dataclasses import dataclass, field
-from typing import Any, Callable, Literal
+from typing import Any, Callable, Literal, TypeVar, Generic, Optional
 
 import requests
 
@@ -41,6 +41,11 @@ class Agent:
         ) if self._insert_name_context else self.system_prompt
         self.base_url = self.base_url.rstrip("/")
 
+    @property
+    def url(self) -> str:
+        """Full URL to the chat endpoint."""
+        return f"{self.base_url}{self.api_endpoint}"
+
     def tool(self, func: Callable[..., Any]) -> Callable[..., Any]:
         """Decorator to register a function as a tool on this agent."""
         return self.tools.register(func)
@@ -65,6 +70,44 @@ class Agent:
         """
         for key in keys:
             self.extra_request_kwargs.pop(key, None)
+
+    def test_connection(self,
+                        timeout: int | float = 5.0) -> _Result[int | str]:
+        """Return connection success.
+
+        Check for both HTTP and non-HTTP errors.
+
+        Args:
+            timeout (int | float): Timeout in seconds.
+
+        Return:
+            A `Result` object with attributes `success` of type `bool` and
+            `error` of type `int` (for HTTP status codes) or `str` (non-HTTP
+            error messages).
+        """
+        try:
+            # Use head() to test connection without downloading response body
+            response = requests.head(self.url, timeout=timeout)
+
+            # Returns True if status code is between 200 and 399
+            return _Result(response.ok, response.status_code)
+
+        except requests.exceptions.ConnectionError:
+            return _Result(
+                False,
+                "Could not connect to the server (network down or invalid "
+                "host)."
+            )
+        except requests.exceptions.Timeout:
+            return _Result(
+                False,
+                "Request timed out."
+            )
+        except requests.exceptions.RequestException as e:
+            return _Result(
+                False,
+                f"An unexpected error occurred: {e}"
+            )
 
     def chat(self, user_message: str) -> dict[str, Any]:
         """Send a message to the model and persist the conversation history.
@@ -148,14 +191,13 @@ class Agent:
             self, api_kwargs: dict[str, Any]
     ) -> dict[str, Any]:
         """Send a chat-completions request and return the decoded response."""
-        url: str = f"{self.base_url}{self.api_endpoint}"
         headers: dict[str, str] = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
         }
 
         r = requests.post(
-            url,
+            self.url,
             headers=headers,
             json=api_kwargs,
             timeout=300,
@@ -241,3 +283,12 @@ class Agent:
                 "tool_call_id": tool_call.get("id"),
                 "content": json.dumps(result),
             })
+
+
+_T = TypeVar("_T")
+
+
+class _Result(Generic[_T]):
+    def __init__(self, success: bool, error: Optional[_T] = None):
+        self.success = success
+        self.error = error

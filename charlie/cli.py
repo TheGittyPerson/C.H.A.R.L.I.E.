@@ -1,3 +1,4 @@
+import time
 import traceback
 from dataclasses import dataclass, field
 
@@ -37,9 +38,33 @@ class CLI:
         if should_show:
             self.console.print(f"\n{traceback.format_exc()}")
 
-    def start(self) -> None:
-        """Start the CLI for the agent."""
+    def start(self, retry_limit: int = 50, retry_delay: int = 500) -> None:
+        """Start the CLI for the agent.
+
+        Args:
+            retry_limit (int):
+                Number of times to retry initial connection before reporting an
+                error.
+            retry_delay (int):
+                Delay in milliseconds between each retry attempt.
+        """
         try:
+            with self.console.status(
+                    "[dim]Connecting...[/dim]",
+                    spinner=self.spinner
+            ):
+                for _ in range(retry_limit):
+                    if (result := self.charlie.test_connection()).success:
+                        break
+                    time.sleep(retry_delay / 1000)
+                else:
+                    self.console.print(
+                        "\n[bold][red]Error:[/red][/bold] Connection "
+                        "failed."
+                        f"\n{result.error}"
+                    )
+                    return
+
             while (
                     user_input := self.console.input(  # I love this operator
                         f"\n[bold][{self.user_color}]"
