@@ -38,7 +38,7 @@ class CLI:
             self.console.print(f"\n{traceback.format_exc()}")
 
     def start(self) -> None:
-        """Start the CLI for the agent. Return status."""
+        """Start the CLI for the agent."""
         try:
             while (
                     user_input := self.console.input(  # I love this operator
