@@ -30,7 +30,7 @@ class CLI:
         """Optionally print the current traceback without crashing on input."""
         try:
             should_show = self.console.input(
-                "\nSee full traceback? [y/n]: "
+                "\nSee full traceback? (y/n): "
             ).lower().strip() == "y"
         except (EOFError, KeyboardInterrupt):
             return
@@ -120,6 +120,7 @@ class CLI:
                 "\nIf you are using a local server, ensure the server is "
                 "running and you are connected to the correct port."
             )
+            self._maybe_show_traceback()
         except requests.exceptions.HTTPError as exc:
             status_code = (
                 exc.response.status_code
@@ -131,23 +132,25 @@ class CLI:
                 "\n[bold][red]Error:[/red][/bold] "
                 f"Server returned HTTP {status_code}{reason_text}."
             )
+            self._maybe_show_traceback()
         except requests.exceptions.RequestException:
             self.console.print(
                 "\n[bold][red]Error:[/red][/bold] Request to the server "
                 "failed."
             )
+            self._maybe_show_traceback()
         except (RuntimeError, ValueError, KeyError) as exc:
             self.console.print(
                 "\n[bold][red]Error:[/red][/bold] "
                 f"C.H.A.R.L.I.E. encountered an error: {exc}"
             )
+            self._maybe_show_traceback()
         except Exception:
             self.console.print(
                 f"\n[bold][red]Error:[/red][/bold] An unexpected error "
                 "occurred."
             )
+            self._maybe_show_traceback()
         else:
             self.console.print(f"\n[dim]{self.exit_message}[/dim]")
             return
-
-        self._maybe_show_traceback()
