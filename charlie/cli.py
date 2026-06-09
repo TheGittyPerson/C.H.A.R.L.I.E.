@@ -71,6 +71,8 @@ class CLI:
                         f"You:[/{self.user_color}][/bold] "
                     )
             ) not in self.exit_keywords:
+                if not user_input:
+                    continue
 
                 with self.console.status(
                     f"[dim]{self.thinking_message}[/dim]",
