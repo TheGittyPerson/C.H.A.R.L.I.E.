@@ -17,7 +17,7 @@ class CLI:
 
     user_color: str = "green"
     agent_color: str = "blue"
-    spinner_style: str = "aesthetic"
+    spinner: str = "aesthetic"
 
     thinking_message: str = "Thinking..."
     exit_keywords: list[str] = field(
@@ -49,7 +49,7 @@ class CLI:
 
                 with self.console.status(
                     f"[dim]{self.thinking_message}[/dim]",
-                    spinner=self.spinner_style
+                    spinner=self.spinner
                 ):
                     response = self.charlie.chat(user_input)
                     content = response.get("content", "").strip()
