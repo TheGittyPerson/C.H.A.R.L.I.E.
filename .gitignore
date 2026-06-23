@@ -26,5 +26,6 @@ dist/
 .idea/
 .vscode/
 
-# Local example runner
+# Project-specific files
 main.py
+*Security_Advisory.pdf
