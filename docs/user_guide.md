@@ -15,6 +15,11 @@ The package is structured around an `Agent` class, a `CLI` class, a tool
 registry, a context registry, and a small set of built-in toolsets for text,
 math, datetime, and structured-data operations.
 
+#### SECURITY WARNING:
+
+**DO NOT** connect unverified LLM servers into this agent. This was a simple 
+hobby project and I didn't really think about security vulnerabilities.
+
 ---
 
 ### Example implementation

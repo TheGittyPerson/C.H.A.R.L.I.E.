@@ -28,4 +28,4 @@ dist/
 
 # Project-specific files
 main.py
-*Security_Advisory.pdf
+*.pdf

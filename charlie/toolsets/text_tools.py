@@ -2,20 +2,27 @@ from typing import Annotated
 
 from ..agent import Agent
 
-MORSE_TO_PLAIN = {
-    ".-": "A", "-...": "B", "-.-.": "C", "-..": "D", ".": "E", "..-.": "F",
-    "--.": "G", "....": "H", "..": "I", ".---": "J", "-.-": "K", ".-..": "L",
-    "--": "M", "-.": "N", "---": "O", ".--.": "P", "--.-": "Q", ".-.": "R",
-    "...": "S", "-": "T", "..-": "U", "...-": "V", ".--": "W", "-..-": "X",
-    "-.--": "Y", "--..": "Z", "-----": "0", ".----": "1", "..---": "2",
-    "...--": "3", "....-": "4", ".....": "5", "-....": "6", "--...": "7",
-    "---..": "8", "----.": "9", ".-.-.-": ".", "--..--": ",", "..--..": "?",
-    ".----.": """, "-.-.--": "!", "-..-.": "/", "-.--.": "(", "-.--.-": ")",
-    ".-...": "&", "---...": ":", "-.-.-.": ";", "-...-": "=", ".-.-.": "+",
-    "-....-": "-", "..--.-": "_", ".-..-.": """, "...-..-": "$", ".--.-.": "@",
-    "/": " ", "...---...": "SOS"
+PLAIN_TO_MORSE = {
+    "a": ".-",     "b": "-...",   "c": "-.-.",   "d": "-..",
+    "e": ".",      "f": "..-.",   "g": "--.",    "h": "....",
+    "i": "..",     "j": ".---",   "k": "-.-",    "l": ".-..",
+    "m": "--",     "n": "-.",     "o": "---",    "p": ".--.",
+    "q": "--.-",   "r": ".-.",    "s": "...",    "t": "-",
+    "u": "..-",    "v": "...-",   "w": ".--",    "x": "-..-",
+    "y": "-.--",   "z": "--..",
+
+    "1": ".----",  "2": "..---",  "3": "...--",  "4": "....-",
+    "5": ".....",  "6": "-....",  "7": "--...",  "8": "---..",
+    "9": "----.",  "0": "-----",
+
+    ".": ".-.-.-", ",": "--..---", "?": "..--..", "'": ".----.",
+    "!": "-.-.--", "/": "-..-.",   "(": "-.--.",  ")": "-.--.-",
+    "&": ".-...",  ":": "---...",  ";": "-.-.-.", "=": "-...-",
+    "+": ".-.-.",  "-": "-....-",  "_": "..--.-", '"': ".-..-.",
+    "$": "...-..-", "@": ".--.-."
 }
-PLAIN_TO_MORSE = {value: key for key, value in MORSE_TO_PLAIN.items()}
+
+MORSE_TO_PLAIN = {value: key for key, value in PLAIN_TO_MORSE.items()}
 
 
 def register_text_tools(charlie: Agent) -> None:
@@ -26,54 +33,86 @@ def register_text_tools(charlie: Agent) -> None:
 def _register_morse_tools(charlie: Agent) -> None:
     @charlie.tool
     def encode_morse(
-            plain: Annotated[str, "Plain ASCII text"]
+            plain: Annotated[str, "Plain ASCII text"],
+            space: Annotated[str, "What spaces will be replaced with"],
     ) -> dict[str, str]:
         """Encode plain text into Morse code.
 
-        Letters are separated by a space.
-        Words are separated by three spaces.
+        Letters are separated by a space. Inconvertible characters are replaces
+        with "#".
+        The given ``space`` parameter will be used to resolve spaces in the
+        given plain text, padded with two extra spaces.
+        e.g., "AB CD" with argument ``space="/"`` (the default)
+          => ".- -... / -.-. -.."
+
         Case-insensitive.
         """
-        words = plain.upper().split(" / ")
+        out = []
+        for char in plain.upper():
+            if char == " ":
+                out.append(f" {space} ")
+            else:
+                out.append(PLAIN_TO_MORSE.get(char, "#") + " ")
 
-        words_encoded = []
-        for word in words:
-            word_encoded = " ".join([PLAIN_TO_MORSE[char] for char in word])
-            words_encoded.append(word_encoded)
-
-        return {"result": " / ".join(words_encoded)}
+        return {"result": "".join(out).strip()}
 
     @charlie.tool
     def decode_morse(
-            morse: Annotated[str, "Morse code (ASCII only, spaces = '/')"]
+            morse: Annotated[str, "Morse code"],
+            space: Annotated[
+                str, "What spaces are represented with in the given morse"
+            ],
     ) -> dict[str, str]:
         """Decode Morse code into plain text.
 
-        Letters should be separated by a space.
-        Words should be separated by three spaces.
-        Case-insensitive.
+        Letters should be separated by a space. Any invalid character will be
+        replaced with "#".
+        The given ``space`` argument will be used to resolve spaces in the
+        given morse code. The string representing a space is assumed to be
+        padded with an extra space on each side, meaning this is an example
+        of the expected input when `space="/"` (the default):
+
+        ".... . .-.. .-.. --- / .-- --- .-. .-.. -.." => "HELLO WORLD"
+
+        Returns text in lowercase.
         """
-        if not all(char in [".", "-", " ", "/"] for char in morse):
+        allowed_chars = {".", "-", " "} | set(space)
+        if not all(char in allowed_chars for char in morse):
             raise ValueError(
                 "Morse code must only contain '.' (periods/dots), '-' (dashes) "
-                "and/or ' ' (spaces)"
+                f"and/or '{space}'"
             )
 
         if not morse.strip():
             return {"result": ""}
 
-        words = morse.strip().split(" / ")
-
+        delimiter = f" {space} "
         words_decoded = []
-        for word in words:
-            letters = word.split()
-            word_decoded = "".join(MORSE_TO_PLAIN[char] for char in letters)
-            words_decoded.append(word_decoded)
+
+        for word in morse.split(delimiter):
+            letters = word.strip().split(" ")
+            decoded_word = "".join(
+                MORSE_TO_PLAIN.get(letter, "#") for letter in letters)
+            words_decoded.append(decoded_word.lower())
 
         return {"result": " ".join(words_decoded)}
 
 
 def _register_basic_text_tools(charlie: Agent) -> None:
+    @charlie.tool
+    def to_uppercase(
+            text: Annotated[str, "Text to convert to uppercase"]
+    ) -> dict[str, str]:
+        """Convert text to uppercase."""
+        return {"result": text.upper()}
+
+    @charlie.tool
+    def to_lowercase(
+            text: Annotated[str, "Text to convert to lowercase"]
+    ):
+        """Convert text to lowercase."""
+        return {"result": text.lower()}
+
     @charlie.tool
     def count_text_length(
             text: Annotated[str, "Text to measure"]

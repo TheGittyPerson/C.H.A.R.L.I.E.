@@ -91,7 +91,7 @@ class Tools:
         }
 
     def register(self, func: Callable[..., Any]) -> Callable[..., Any]:
-        """Attach generated schema to `func` (if missing), register by name
+        """Attach generated schema to `func` (if missing), register by name.
 
         Return `func`.
         """

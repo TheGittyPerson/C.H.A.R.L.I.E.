@@ -1,6 +1,5 @@
 import datetime
 import getpass
-import os
 import platform
 from typing import Any
 
@@ -15,7 +14,6 @@ def register_default_contexts(charlie: Agent, **context: Any) -> None:
             - current date and time
             - current user
         - `environment_context`
-            - current working directory
             - operating system name
             - Python version
             - timezone
@@ -45,7 +43,6 @@ def register_default_contexts(charlie: Agent, **context: Any) -> None:
             timezone = datetime.datetime.now().astimezone().tzinfo
 
         return (
-            f"Current working directory: {os.getcwd()}\n"
             f"Operating system: {platform.system()}\n"
             f"Python version: {platform.python_version()}\n"
             f"Timezone: {timezone}\n"
