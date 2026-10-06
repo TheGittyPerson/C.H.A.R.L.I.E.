@@ -34,7 +34,7 @@ def _register_morse_tools(charlie: Agent) -> None:
     @charlie.tool
     def encode_morse(
             plain: Annotated[str, "Plain ASCII text"],
-            space: Annotated[str, "What spaces will be replaced with"],
+            space: Annotated[str, "What spaces will be replaced with"] = "/",
     ) -> dict[str, str]:
         """Encode plain text into Morse code.
 
@@ -48,7 +48,7 @@ def _register_morse_tools(charlie: Agent) -> None:
         Case-insensitive.
         """
         out = []
-        for char in plain.upper():
+        for char in plain.lower():
             if char == " ":
                 out.append(f" {space} ")
             else:
@@ -61,12 +61,12 @@ def _register_morse_tools(charlie: Agent) -> None:
             morse: Annotated[str, "Morse code"],
             space: Annotated[
                 str, "What spaces are represented with in the given morse"
-            ],
+            ] = "/",
     ) -> dict[str, str]:
         """Decode Morse code into plain text.
 
-        Letters should be separated by a space. Any invalid character will be
-        replaced with "#".
+        Letters should be separated by a space. Any invalid morse sequence
+        will be replaced with "#".
         The given ``space`` argument will be used to resolve spaces in the
         given morse code. The string representing a space is assumed to be
         padded with an extra space on each side, meaning this is an example
