@@ -27,6 +27,7 @@ class Agent:
     tools: Tools = field(default_factory=Tools)
     contexts: Contexts = field(default_factory=Contexts)
     messages: list[dict[str, Any]] = field(default_factory=list)
+    reasoning_content: list[str] = field(default_factory=list)
 
     name: str = "C.H.A.R.L.I.E."
     name_desc: str = ("Cognitive Helper for Adaptive Response "
@@ -131,6 +132,12 @@ class Agent:
             token_cost += self._extract_token_cost(response_data) or 0
             tool_calls = self._append_assistant_message(message_content)
 
+            # To combine reasoning content received across responses
+            # (after tool calls). Cleared after each chat message below.
+            self.reasoning_content.append(
+                message_content.get("reasoning_content") or ""
+            )
+
             if not tool_calls:
                 out = {
                     "content": message_content.get("content") or "",
@@ -138,15 +145,14 @@ class Agent:
                 if self.reasoning not in [None, "off"]:
                     out.update(
                         {
-                            "reasoning": message_content.get(
-                                "reasoning_content"
-                            ) or ""
+                            "reasoning": "\n".join(self.reasoning_content)
                         }
                     )
                 out.update(
                     {"token_cost": token_cost if token_cost != 0 else None}
                 )
 
+                self.reasoning_content.clear()
                 return out
 
             self._handle_tool_calls(tool_calls)
