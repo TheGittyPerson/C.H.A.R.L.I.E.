@@ -86,6 +86,10 @@ class CLI:
                 if not user_input:
                     continue
 
+                self.console.print(
+                    f"\n[bold][{self.agent_color}]{self.charlie.name}:"
+                    f"[/{self.agent_color}][/bold]\n"
+                )
                 with self.console.status(
                     f"[dim]{self.thinking_message}[/dim]",
                     spinner=self.spinner
@@ -95,13 +99,9 @@ class CLI:
                     reasoning = response.get("reasoning", "").strip()
                     token_cost = response.get("token_cost") or "-"
 
-                self.console.print(
-                    f"\n[bold][{self.agent_color}]{self.charlie.name}:"
-                    f"[/{self.agent_color}][/bold]"
-                )
                 if self.show_reasoning and reasoning:
                     self.console.print(
-                        f"\n[dim][bold]Reasoning:[/bold] {reasoning}[/dim]",
+                        f"[dim][bold]Reasoning:[/bold] {reasoning}[/dim]",
                     )
 
                 self.console.print(f"\n{content}")
