@@ -73,12 +73,20 @@ class Agent:
             self.extra_request_kwargs.pop(key, None)
 
     def test_connection(self,
+                        test_endpoint: str | None = None,
+                        method: str = "HEAD",
                         timeout: int | float = 5.0) -> _Result[int | str]:
         """Return connection success.
 
         Check for both HTTP and non-HTTP errors.
 
         Args:
+            test_endpoint (str):
+                API endpoint used to test connection. Uses
+                ``self.api_endpoint`` if falsey.
+            method (str):
+                HTTP request method to use (HEAD, POST, GET supported).
+                Defaults to HEAD.
             timeout (int | float): Timeout in seconds.
 
         Return:
@@ -86,11 +94,22 @@ class Agent:
             `error` of type `int` (for HTTP status codes) or `str` (non-HTTP
             error messages).
         """
-        try:
-            # Use head() to test connection without downloading response body
-            response = requests.head(self.url, timeout=timeout)
+        test_url = f"{self.base_url}/{test_endpoint or self.url}"
 
-            # Returns True if status code is between 200 and 399
+        try:
+            match method.upper():
+                case "GET":
+                    response = requests.get(test_url, timeout=timeout)
+                case "POST":
+                    response = requests.post(test_url, timeout=timeout)
+                case "HEAD":
+                    response = requests.head(test_url, timeout=timeout)
+                case _:
+                    raise ValueError("Method must be 'HEAD', 'POST' or 'GET'")
+
+            # ``response.ok`` means between 200 and 399
+            # noinspection unbound-local-variable
+            # Fuckass linter
             return _Result(response.ok, response.status_code)
 
         except requests.exceptions.ConnectionError:

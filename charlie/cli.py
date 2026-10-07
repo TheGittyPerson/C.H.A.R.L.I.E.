@@ -38,7 +38,11 @@ class CLI:
         if should_show:
             self.console.print(f"\n{traceback.format_exc()}")
 
-    def start(self, retry_limit: int = 50, retry_delay: int = 500) -> None:
+    def start(self,
+              retry_limit: int = 50,
+              retry_delay: int = 500,
+              test_endpoint: str | None = None,
+              test_method: str = "head") -> None:
         """Start the CLI for the agent.
 
         Args:
@@ -47,6 +51,11 @@ class CLI:
                 error.
             retry_delay (int):
                 Delay in milliseconds between each retry attempt.
+            test_endpoint (str | None):
+                API endpoint to use for connection testing. Defaults to chat
+                endpoint if falsey.
+            test_method (str):
+                HTTP request method to use for connection testing.
         """
         try:
             with self.console.status(
@@ -54,7 +63,10 @@ class CLI:
                     spinner=self.spinner
             ):
                 for _ in range(retry_limit):
-                    if (result := self.charlie.test_connection()).success:
+                    result = self.charlie.test_connection(
+                        test_endpoint=test_endpoint, method=test_method
+                    )
+                    if result.success:
                         break
                     time.sleep(retry_delay / 1000)
                 else:
