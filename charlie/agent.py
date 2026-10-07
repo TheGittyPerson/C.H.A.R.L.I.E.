@@ -183,8 +183,8 @@ class Agent:
     def _build_prefix_messages(self) -> list[dict[str, Any]]:
         """Build the system and context messages prepended to each request."""
         return [
-            {"role": "system", "content": self.system_prompt},
-            {"role": "system", "content": self.contexts.render()},
+            {"role": "system", "content":
+                self.system_prompt + "\n\n---\n\n" + self.contexts.render()}
         ]
 
     def _build_request_payload(
